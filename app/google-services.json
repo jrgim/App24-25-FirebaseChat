@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "870531322261",
+    "project_id": "groupchatusj",
+    "storage_bucket": "groupchatusj.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870531322261:android:c4632da5a68a3b9b94a69c",
+        "android_client_info": {
+          "package_name": "es.usj.jglopez.firebasechat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEOU95pfUL_msUKMXQAW_Cy1R-NylxQP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
