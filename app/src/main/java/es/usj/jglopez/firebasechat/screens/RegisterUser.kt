@@ -27,6 +27,9 @@ class RegisterUser : AppCompatActivity() {
         // Reference to "users" node
         val usersRef = Firebase.database.getReference("users")
 
+        val chatroomMap = HashMap<String, Boolean>()
+        chatroomMap["testRoom"] = false
+
         // Create a new User without ID
         view.btnCreateUser.setOnClickListener {
             val user = User(
@@ -34,7 +37,7 @@ class RegisterUser : AppCompatActivity() {
                 name = view.etUserName.text.toString(),
                 password = view.etPassword.text.toString(),
                 createdAt = System.currentTimeMillis(),
-                chatrooms = HashMap()
+                chatrooms = chatroomMap
             )
 
             // Push a new child (generates a unique key)
