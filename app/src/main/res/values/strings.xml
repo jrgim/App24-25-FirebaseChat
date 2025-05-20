@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Firebase Chat</string>
+    <string name="add_chat">add_chat</string>
 </resources>

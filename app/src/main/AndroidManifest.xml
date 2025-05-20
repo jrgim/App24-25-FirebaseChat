@@ -13,6 +13,9 @@
         android:theme="@style/Theme.FirebaseChat"
         tools:targetApi="31">
         <activity
+            android:name=".screens.chatScreen"
+            android:exported="false" />
+        <activity
             android:name=".screens.CreateChat"
             android:exported="false" />
         <activity
