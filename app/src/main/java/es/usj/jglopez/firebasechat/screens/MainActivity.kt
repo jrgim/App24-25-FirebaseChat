@@ -73,6 +73,19 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        val chatsRef = Firebase.database.getReference("chatrooms")
+        chatsRef.get().addOnSuccessListener { dataSnapshot ->
+            chatList.clear()
+            for (chatSnapshot in dataSnapshot.children) {
+                val chat = chatSnapshot.getValue(chatroom::class.java)
+                if (chat != null) {
+                    chatList.add(chat)
+                }
+            }
+            adapter.submitList(chatList.toList())
+        }
+
+
         view.fbAddChat.setOnClickListener {
             val intent = Intent(this, CreateChat::class.java)
             startActivity(intent)
