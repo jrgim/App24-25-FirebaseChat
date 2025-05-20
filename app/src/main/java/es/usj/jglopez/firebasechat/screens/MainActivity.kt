@@ -85,6 +85,27 @@ class MainActivity : AppCompatActivity() {
             adapter.submitList(chatList.toList())
         }
 
+        chatsRef.addValueEventListener( object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                chatsRef.get().addOnSuccessListener { dataSnapshot ->
+                    chatList.clear()
+                    for (chatSnapshot in dataSnapshot.children) {
+                        val chat = chatSnapshot.getValue(chatroom::class.java)
+                        if (chat != null) {
+                            chatList.add(chat)
+                        }
+                    }
+                    adapter.submitList(chatList.toList())
+                }
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        )
 
         view.fbAddChat.setOnClickListener {
             val intent = Intent(this, CreateChat::class.java)
@@ -110,7 +131,7 @@ class CustomAdapter(
         val chatroom = getItem(position)
 
         holder.chatName.text = chatroom.name ?: "Unnamed chat"
-        holder.chatLastMessage.text = chatroom.lastMessage
+        holder.chatLastMessage.text = "${chatroom.lastMessage}, by ${chatroom.createdBy}"
     }
 
     // Este override es opcional, ya que ListAdapter lo maneja
