@@ -21,21 +21,23 @@ class CreateChat : AppCompatActivity() {
     private val view by lazy {
         ActivityCreateChatBinding.inflate(layoutInflater)
     }
-    val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
-    val preferences = ForPreferencesStorageImpl(sharedPreferences)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(view.root)
 
+        val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
+        val preferences = ForPreferencesStorageImpl(sharedPreferences)
         view.submit.setOnClickListener {
             val chat1 = chatroom(
                 id = "",
                 name = view.name.text.toString(),
                 lastMessage = view.lastMessage.text.toString(),
-                participants = hashMapOf(preferences.getUser()!!.id to true),
+                participants = hashMapOf(preferences.getUser()!!.name to true),
                 createdBy = preferences.getUser()!!.name.toString(),
                 createdAt = System.currentTimeMillis()
             )
+            Log.d("chatroom", chat1.toString())
             val chatsRef = Firebase.database.getReference("chatrooms")
 
             val newChatRef = chatsRef.push()
@@ -66,7 +68,7 @@ class CreateChat : AppCompatActivity() {
                 adapter.submitList(chatList.toList()) // Actualizamos la lista en el adapter
             }
 
-            startActivity(Intent(this@CreateChat, MainActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
         }
 
     }
