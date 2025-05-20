@@ -24,7 +24,6 @@ class SplashScreen : AppCompatActivity() {
         setContentView(view.root) // Establece la vista correcta
         val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
         val preferences = ForPreferencesStorageImpl(sharedPreferences)
-        preferences.clearUser()
         val user = preferences.getUser()
         if (user != null) {
             startActivity(Intent(this@SplashScreen, MainActivity::class.java))
