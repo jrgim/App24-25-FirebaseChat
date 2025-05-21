@@ -2,6 +2,7 @@ package es.usj.jglopez.firebasechat.screens
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +20,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import es.usj.jglopez.firebasechat.R
 import es.usj.jglopez.firebasechat.database.ForPreferencesStorageImpl
-import es.usj.jglopez.firebasechat.database.Message
+import es.usj.jglopez.firebasechat.database.message
 import es.usj.jglopez.firebasechat.database.chatroom
 import es.usj.jglopez.firebasechat.databinding.ActivityMainBinding
 
@@ -53,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 Toast.makeText(this@MainActivity, "Data changed", Toast.LENGTH_SHORT).show()
                 for (messageSnapshot in snapshot.children) {
-                    val message = messageSnapshot.getValue(Message::class.java)
+                    val message = messageSnapshot.getValue(message::class.java)
                     // Do something with the message
                 }
             }
@@ -66,11 +67,25 @@ class MainActivity : AppCompatActivity() {
         chatsRef.get().addOnSuccessListener { dataSnapshot ->
             chatList.clear()
             for (chatSnapshot in dataSnapshot.children) {
-                val chat = chatSnapshot.getValue(chatroom::class.java)
-                // Solo añadir si el usuario es participante
-                if (chat != null && chat.participants?.containsKey(userName) == true) {
-                    chatList.add(chat)
+                val chat = chatSnapshot
+                val messageList = mutableListOf<message>()
+                val messagesSnapshot = chatSnapshot.child("messages")
+                for (messageSnapshot in messagesSnapshot.children) {
+                    val msg = messageSnapshot.getValue(message::class.java)
+                    if (msg != null) {
+                        messageList.add(msg)
+                    }
                 }
+                messageList.sortBy { it.timestamp }
+                val lastMessage = messageList.lastOrNull()?.messageText ?: "No messages"
+                val id = chatSnapshot.child("id")
+                val name = chatSnapshot.child("name")
+                val participants = chatSnapshot.child("participants")
+                val createdBy = chatSnapshot.child("createdBy")
+                val createdAt = chatSnapshot.child("createdAt")
+                val safechat = chatroom(id.value.toString(), name.value.toString(), participants.value as? HashMap<String, Boolean>, messageList, createdBy.value.toString(), createdAt.value as? Long, lastMessage)
+                if (chat != null && safechat.participants?.containsKey(userName) == true) {chatList.add(safechat)}
+
             }
             adapter.submitList(chatList.toList())
         }
@@ -79,19 +94,43 @@ class MainActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 chatsRef.get().addOnSuccessListener { dataSnapshot ->
                     chatList.clear()
-                    for (chatSnapshot in dataSnapshot.children) {
-                        val chat = chatSnapshot.getValue(chatroom::class.java)
-                        if (chat != null && chat.participants?.containsKey(userName) == true) {
-                            chatList.add(chat)
+                    try {
+                        for (chatSnapshot in dataSnapshot.children) {
+                            // Manually parse messages list
+                            val messageList = mutableListOf<message>()
+                            val messagesSnapshot = chatSnapshot.child("messages")
+                            for (messageSnapshot in messagesSnapshot.children) {
+                                val msg = messageSnapshot.getValue(message::class.java)
+                                if (msg != null) {
+                                    messageList.add(msg)
+                                }
+                            }
+                            messageList.sortBy { it.timestamp }
+                            val lastMessage = messageList.lastOrNull()?.messageText ?: "No messages"
+
+                            val id = chatSnapshot.child("id").value?.toString() ?: ""
+                            val name = chatSnapshot.child("name").value?.toString() ?: "Unnamed chat"
+                            val participants = chatSnapshot.child("participants").getValue() as? HashMap<String, Boolean>
+                            val createdBy = chatSnapshot.child("createdBy").value?.toString() ?: "Unknown"
+                            val createdAt = chatSnapshot.child("createdAt").value as? Long
+
+                            val safechat = chatroom(id, name, participants, messageList, createdBy, createdAt, lastMessage)
+
+                            if (safechat.participants?.containsKey(userName) == true) {
+                                chatList.add(safechat)
+                            }
                         }
+                        adapter.submitList(chatList.toList())
+                    } catch (e: Exception) {
+                        Log.d("adapterList", e.toString())
                     }
-                    adapter.submitList(chatList.toList())
                 }
             }
             override fun onCancelled(error: DatabaseError) {
-                // Handle errors
+                println("Error: ${error.message}")
             }
         })
+
 
         view.fbAddChat.setOnClickListener {
             val intent = Intent(this, CreateChat::class.java)
@@ -115,7 +154,13 @@ class CustomAdapter : ListAdapter<chatroom, CustomAdapter.ChatroomViewHolder>(Di
     override fun onBindViewHolder(holder: ChatroomViewHolder, position: Int) {
         val chatroom = getItem(position)
         holder.chatName.text = chatroom.name ?: "Unnamed chat"
-        holder.chatLastMessage.text = "${chatroom.lastMessage}, by ${chatroom.createdBy}"
+        holder.chatLastMessage.text = "${chatroom.createdBy}: ${chatroom.lastMessage}"
+
+        holder.itemView.setOnClickListener {
+            val intent = Intent(holder.itemView.context, chatScreen::class.java)
+            intent.putExtra("chatroom", chatroom.id)
+            holder.itemView.context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int {
