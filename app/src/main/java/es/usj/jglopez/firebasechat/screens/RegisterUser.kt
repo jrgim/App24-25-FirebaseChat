@@ -30,7 +30,6 @@ class RegisterUser : AppCompatActivity() {
         usersRef.get().addOnSuccessListener { dataSnapshot ->
             for (userSnapshot in dataSnapshot.children) {
                 hashUsers.put(userSnapshot.child("name").value.toString(), userSnapshot.child("password").value.toString())
-
             }
         }
         val chatroomMap = HashMap<String, Boolean>()
@@ -38,44 +37,55 @@ class RegisterUser : AppCompatActivity() {
 
         // Create a new User without ID
         view.btnCreateUser.setOnClickListener {
-
-            if (hashUsers.containsKey(view.etUserName.text.toString())) {
-                Toast.makeText(this, "Username already exists", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (view.etPassword.text.toString() != view.etPassword.text.toString()) {
-                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val user = User(
-                id = "",
-                name = view.etUserName.text.toString(),
-                password = view.etPassword.text.toString(),
-                createdAt = System.currentTimeMillis(),
-                chatrooms = chatroomMap
-            )
-
-            // Push a new child (generates a unique key)
-            val newUserRef = usersRef.push()
-
-            // Copy the user object and add the generated ID
-            val userWithId = user.copy(id = newUserRef.key!!)
-
-            // Set the value
-            newUserRef.setValue(userWithId)
-                .addOnSuccessListener {
-                    Toast.makeText(this, "User saved with ID ${userWithId.name}", Toast.LENGTH_SHORT).show()
-                }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Error saving user", Toast.LENGTH_SHORT).show()
-                }
+            val username = view.etUserName.text.toString()
+            val password = view.etPassword.text.toString()
             val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
             val preferences = ForPreferencesStorageImpl(sharedPreferences)
-            preferences.saveUser(user)
-            startActivity(Intent(this@RegisterUser, MainActivity::class.java))
 
+            if (hashUsers.containsKey(username) && hashUsers[username] == password) {
+                // Usuario y contraseña correctos
+                Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show()
+                val user = User(
+                    id = "",
+                    name = view.etUserName.text.toString(),
+                    password = view.etPassword.text.toString(),
+                    createdAt = System.currentTimeMillis(),
+                    chatrooms = chatroomMap
+                )
+                preferences.saveUser(user)
+                startActivity(Intent(this@RegisterUser, MainActivity::class.java))
+                finish()
+            } else {
+                if(hashUsers.containsKey(username)) {
+                    Toast.makeText(this, "Account already exists / Incorrect password", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }else{
+                val user = User(
+                    id = "",
+                    name = view.etUserName.text.toString(),
+                    password = view.etPassword.text.toString(),
+                    createdAt = System.currentTimeMillis(),
+                    chatrooms = chatroomMap
+                )
+
+                // Push a new child (generates a unique key)
+                val newUserRef = usersRef.push()
+
+                // Copy the user object and add the generated ID
+                val userWithId = user.copy(id = newUserRef.key!!)
+
+                // Set the value
+                newUserRef.setValue(userWithId)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "User saved with ID ${userWithId.name}", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "Error saving user", Toast.LENGTH_SHORT).show()
+                    }
+                preferences.saveUser(user)
+                startActivity(Intent(this@RegisterUser, MainActivity::class.java))
+    }
+            }
         }
     }
 }
