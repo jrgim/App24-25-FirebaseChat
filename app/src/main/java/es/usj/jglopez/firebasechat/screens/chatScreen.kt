@@ -1,6 +1,7 @@
 package es.usj.jglopez.firebasechat.screens
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -44,6 +45,12 @@ class chatScreen : AppCompatActivity() {
         val chatroomId = intent.getStringExtra("chatroomID")
         val chatroomName = intent.getStringExtra("chatroomName")
         view.tvChatTitle.text = chatroomName
+
+        view.fbAddChat2.setOnClickListener {
+            val intent = Intent(this@chatScreen, AddParticipants::class.java)
+            intent.putExtra("chatroomId", chatroomId) // pasamos el ID del chat
+            startActivity(intent)
+        }
 
         val recyclerView = view.rvMessageScreen
         recyclerView.layoutManager = LinearLayoutManager(this)
