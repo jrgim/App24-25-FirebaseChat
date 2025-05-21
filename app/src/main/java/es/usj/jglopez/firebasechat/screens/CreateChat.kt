@@ -3,6 +3,7 @@ package es.usj.jglopez.firebasechat.screens
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.Firebase
@@ -15,6 +16,7 @@ import es.usj.jglopez.firebasechat.screens.MainActivity.Companion.adapter
 import es.usj.jglopez.firebasechat.screens.MainActivity.Companion.chatList
 
 class CreateChat : AppCompatActivity() {
+
     private val view by lazy {
         ActivityCreateChatBinding.inflate(layoutInflater)
     }
@@ -25,53 +27,93 @@ class CreateChat : AppCompatActivity() {
 
         val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
         val preferences = ForPreferencesStorageImpl(sharedPreferences)
-        val initialMessage = message("0", preferences.getUser()!!.name, "Created the chat", System.currentTimeMillis())
-        val messages = mutableListOf(initialMessage)
+
+        loadUsers(preferences.getUser()!!.name) // Mostrar usuarios, excluyendo al actual
 
         view.submit.setOnClickListener {
-            val chat1 = chatroom(
+            val chatName = view.name.text.toString().trim()
+
+            if (chatName.isEmpty()) {
+                Toast.makeText(this, "Chat name cannot be empty", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val selectedParticipants = hashMapOf(preferences.getUser()!!.name to true)
+
+            for (i in 0 until view.checkboxContainer.childCount) {
+                val child = view.checkboxContainer.getChildAt(i)
+                if (child is CheckBox && child.isChecked) {
+                    selectedParticipants[child.tag as String] = true
+                }
+            }
+
+            if (selectedParticipants.size < 2) {
+                Toast.makeText(this, "Select at least one other user", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val initialMessage = message(
+                id = "0",
+                senderName = preferences.getUser()!!.name,
+                messageText = "Created the chat",
+                timestamp = System.currentTimeMillis()
+            )
+            val messages = mutableListOf(initialMessage)
+
+            val chat = chatroom(
                 id = "",
-                name = view.name.text.toString(),
-                messages = messages.toList(),
+                name = chatName,
+                messages = messages,
                 lastMessage = "Created the chat",
-                participants = hashMapOf(preferences.getUser()!!.name to true),
-                createdBy = preferences.getUser()!!.name.toString(),
+                participants = selectedParticipants,
+                createdBy = preferences.getUser()!!.name,
                 createdAt = System.currentTimeMillis()
             )
-            Log.d("chatroom", chat1.toString())
+
             val chatsRef = Firebase.database.getReference("chatrooms")
-
             val newChatRef = chatsRef.push()
+            val chatWithId = chat.copy(id = newChatRef.key!!)
 
-            val chatroomWithId = chat1.copy(id = newChatRef.key!!)
-
-            newChatRef.setValue(chatroomWithId)
+            newChatRef.setValue(chatWithId)
                 .addOnSuccessListener {
-                    Toast.makeText(this, "Chatroom saved: ${chatroomWithId.name}", Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(this, "Chatroom created!", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener {
                     Toast.makeText(this, "Error saving chatroom", Toast.LENGTH_SHORT).show()
                 }
 
+            // Refrescar la lista de chats
             chatsRef.get().addOnSuccessListener { dataSnapshot ->
                 chatList.clear()
                 for (chatSnapshot in dataSnapshot.children) {
-                    try {
-                        val chat = chatSnapshot.getValue(chatroom::class.java)
-                        if (chat != null) {
-                            chatList.add(chat)
-                        }
-                    } catch (e: Exception) {
-                        Log.e("FirebaseError", "Error parsing chatroom", e)
+                    val c = chatSnapshot.getValue(chatroom::class.java)
+                    if (c != null) {
+                        chatList.add(c)
                     }
                 }
-                adapter.submitList(chatList.toList()) // Actualizamos la lista en el adapter
+                adapter.submitList(chatList.toList())
             }
 
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
+    }
 
+    private fun loadUsers(currentUserName: String) {
+        val usersRef = Firebase.database.getReference("users")
+
+        usersRef.get().addOnSuccessListener { dataSnapshot ->
+            for (userSnapshot in dataSnapshot.children) {
+                val name = userSnapshot.child("name").getValue(String::class.java)
+                if (name != null && name != currentUserName) {
+                    val checkBox = CheckBox(this)
+                    checkBox.text = name
+                    checkBox.tag = name
+                    view.checkboxContainer.addView(checkBox)
+                }
+            }
+        }.addOnFailureListener {
+            Toast.makeText(this, "Failed to load users", Toast.LENGTH_SHORT).show()
+        }
     }
 }
