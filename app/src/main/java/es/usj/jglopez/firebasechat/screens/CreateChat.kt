@@ -53,7 +53,6 @@ class CreateChat : AppCompatActivity() {
             selectedUsers.forEach { selectedParticipants[it] = true }
 
             val initialMessage = message(
-                id = "0",
                 senderName = currentUser,
                 messageText = "Created the chat",
                 timestamp = System.currentTimeMillis()

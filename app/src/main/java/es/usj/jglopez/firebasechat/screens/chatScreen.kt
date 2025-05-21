@@ -103,7 +103,7 @@ class chatScreen : AppCompatActivity() {
             if (view.messageBody.text.isBlank()) {
                 return@setOnClickListener
             }
-            val message = message("1", preferences.getUser()!!.name, view.messageBody.text.toString(), System.currentTimeMillis())
+            val message = message(preferences.getUser()!!.name, view.messageBody.text.toString(), System.currentTimeMillis())
             try{ chatsRef.child(chatroomId!!).child("messages").push().setValue(message) }
             catch (e: Exception){ Log.d("adapterList", e.toString()) }
             view.messageBody.text.clear()
