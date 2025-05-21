@@ -26,12 +26,29 @@ class RegisterUser : AppCompatActivity() {
 
         // Reference to "users" node
         val usersRef = Firebase.database.getReference("users")
+        val hashUsers = HashMap<String, String>()
+        usersRef.get().addOnSuccessListener { dataSnapshot ->
+            for (userSnapshot in dataSnapshot.children) {
+                hashUsers.put(userSnapshot.child("name").value.toString(), userSnapshot.child("password").value.toString())
 
+            }
+        }
         val chatroomMap = HashMap<String, Boolean>()
         chatroomMap["testRoom"] = false
 
         // Create a new User without ID
         view.btnCreateUser.setOnClickListener {
+
+            if (hashUsers.containsKey(view.etUserName.text.toString())) {
+                Toast.makeText(this, "Username already exists", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (view.etPassword.text.toString() != view.etPassword.text.toString()) {
+                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val user = User(
                 id = "",
                 name = view.etUserName.text.toString(),
