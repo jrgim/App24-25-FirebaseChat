@@ -1,12 +1,13 @@
 package es.usj.jglopez.firebasechat.screens
 
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +25,7 @@ import es.usj.jglopez.firebasechat.databinding.ActivityChatScreenBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.graphics.toColorInt
 
 
 class chatScreen : AppCompatActivity() {
@@ -42,7 +44,7 @@ class chatScreen : AppCompatActivity() {
 
         val recyclerView = view.rvMessageScreen
         recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapterL = ChatAdapter()
+        val adapterL = ChatAdapter(preferences.getUser()?.name ?:"")
         recyclerView.adapter = adapterL
 
         val chatsRef = Firebase.database.getReference("chatrooms")
@@ -130,11 +132,16 @@ class chatScreen : AppCompatActivity() {
 
     }
 }
-class ChatAdapter : ListAdapter<message, ChatAdapter.ChatroomViewHolder>(DiffCallback()) {
+
+class ChatAdapter(currentUser: String) : ListAdapter<message, ChatAdapter.ChatroomViewHolder>(DiffCallback()) {
     class ChatroomViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val sender: TextView = view.findViewById(R.id.senderNameTextView)
-        val message: TextView = view.findViewById(R.id.messageTextView)
-        val timestamp: TextView = view.findViewById(R.id.timestampTextView)
+        val senderUser: TextView = view.findViewById(R.id.senderUser)
+        val messageUser: TextView = view.findViewById(R.id.messageUser)
+        val timeUser: TextView = view.findViewById(R.id.timeUser)
+
+        val senderOther: TextView = view.findViewById(R.id.senderOther)
+        val messageOther: TextView = view.findViewById(R.id.messageOther)
+        val timeOther: TextView = view.findViewById(R.id.timeOther)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatroomViewHolder {
@@ -143,15 +150,28 @@ class ChatAdapter : ListAdapter<message, ChatAdapter.ChatroomViewHolder>(DiffCal
         return ChatroomViewHolder(view)
     }
 
+    val currentUser = currentUser
     override fun onBindViewHolder(holder: ChatroomViewHolder, position: Int) {
         val messageItem = getItem(position)
-        holder.sender.text = messageItem.senderName
-        holder.message.text = messageItem.messageText
-
-        // Format timestamp (e.g., "14:30")
+        Log.d("userBIND", "$currentUser")
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         val timeString = messageItem.timestamp?.let { timeFormat.format(Date(it)) } ?: ""
-        holder.timestamp.text = timeString
+        Log.d("userBIND", "$messageItem")
+        if (messageItem.senderName == currentUser) {
+            holder.itemView.findViewById<View>(R.id.userMessageGroup).visibility = View.VISIBLE
+            holder.itemView.findViewById<View>(R.id.otherMessageGroup).visibility = View.GONE
+
+            holder.senderUser.text = messageItem.senderName
+            holder.messageUser.text = messageItem.messageText
+            holder.timeUser.text = timeString
+        } else {
+            holder.itemView.findViewById<View>(R.id.userMessageGroup).visibility = View.GONE
+            holder.itemView.findViewById<View>(R.id.otherMessageGroup).visibility = View.VISIBLE
+
+            holder.senderOther.text = messageItem.senderName
+            holder.messageOther.text = messageItem.messageText
+            holder.timeOther.text = timeString
+        }
     }
 
     class DiffCallback : DiffUtil.ItemCallback<message>() {
