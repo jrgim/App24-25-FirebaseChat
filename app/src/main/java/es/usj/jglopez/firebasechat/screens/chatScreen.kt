@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.core.graphics.toColorInt
+import es.usj.jglopez.firebasechat.screens.MainActivity.Companion.adapter
 
 
 class chatScreen : AppCompatActivity() {
@@ -40,7 +41,9 @@ class chatScreen : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
         val preferences = ForPreferencesStorageImpl(sharedPreferences)
 
-        val chatroomId = intent.getStringExtra("chatroom")
+        val chatroomId = intent.getStringExtra("chatroomID")
+        val chatroomName = intent.getStringExtra("chatroomName")
+        view.tvChatTitle.text = chatroomName
 
         val recyclerView = view.rvMessageScreen
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -49,6 +52,9 @@ class chatScreen : AppCompatActivity() {
 
         val chatsRef = Firebase.database.getReference("chatrooms")
         var chatroom = chatroom()
+
+
+
         chatsRef.get().addOnSuccessListener { dataSnapshot ->
             for (chatSnapshot in dataSnapshot.children) {
                 if (chatSnapshot.key == chatroomId) {
@@ -75,13 +81,21 @@ class chatScreen : AppCompatActivity() {
                     // Create chatroom object
                     val safeChatroom = chatroom(id, name, participants, messageList, createdBy, createdAt, safeList.lastOrNull()?.messageText ?: "No messages")
 
-                    adapterL.submitList(safeList)
+                    adapterL.submitList(safeList) {
+                        // Este bloque se ejecuta después de que la lista ha sido actualizada en pantalla
+                        recyclerView.post {
+                            recyclerView.scrollToPosition(safeList.size - 1)
+                        }
+                    }
                 }
             }
         }
 
         val messagesRef = chatsRef.child(chatroomId.toString()).child("messages")
         view.sendMessage.setOnClickListener {
+            if (view.messageBody.text.isBlank()) {
+                return@setOnClickListener
+            }
             val message = message("1", preferences.getUser()!!.name, view.messageBody.text.toString(), System.currentTimeMillis())
             try{ chatsRef.child(chatroomId!!).child("messages").push().setValue(message) }
             catch (e: Exception){ Log.d("adapterList", e.toString()) }
@@ -119,7 +133,12 @@ class chatScreen : AppCompatActivity() {
                             chatroom = chatroom(id, name, participants, messageList, createdBy, createdAt, safeList.lastOrNull()?.messageText ?: "No messages")
 
                             // Submit sorted and safe message list to adapter
-                            adapterL.submitList(safeList)
+                            adapterL.submitList(safeList) {
+                                // Este bloque se ejecuta después de que la lista ha sido actualizada en pantalla
+                                recyclerView.post {
+                                    recyclerView.scrollToPosition(safeList.size - 1)
+                                }
+                            }
                         }
                     }
                 }

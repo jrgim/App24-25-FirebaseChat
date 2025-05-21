@@ -154,11 +154,12 @@ class CustomAdapter : ListAdapter<chatroom, CustomAdapter.ChatroomViewHolder>(Di
     override fun onBindViewHolder(holder: ChatroomViewHolder, position: Int) {
         val chatroom = getItem(position)
         holder.chatName.text = chatroom.name ?: "Unnamed chat"
-        holder.chatLastMessage.text = "${chatroom.createdBy}: ${chatroom.lastMessage}"
+        holder.chatLastMessage.text = "${chatroom.lastMessage}"
 
         holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, chatScreen::class.java)
-            intent.putExtra("chatroom", chatroom.id)
+            intent.putExtra("chatroomID", chatroom.id)
+            intent.putExtra("chatroomName", chatroom.name)
             holder.itemView.context.startActivity(intent)
         }
     }
