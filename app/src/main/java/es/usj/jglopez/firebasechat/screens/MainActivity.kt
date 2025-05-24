@@ -47,6 +47,15 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
+        val usersRef = Firebase.database.getReference("users")
+        usersRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                Toast.makeText(this@MainActivity, "Data changed", Toast.LENGTH_SHORT).show()
+            }
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
+        
         val chatsRef = Firebase.database.getReference("chatrooms")
         chatsRef.get().addOnSuccessListener { dataSnapshot ->
             chatList.clear()
@@ -59,6 +68,7 @@ class MainActivity : AppCompatActivity() {
                         messageList.add(msg)
                     }
                 }
+                
                 messageList.sortBy { it.timestamp }
                 val lastMessage = messageList.lastOrNull()?.messageText ?: "No messages"
                 val id = chatSnapshot.child("id").value?.toString() ?: ""
@@ -116,6 +126,14 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, CreateChat::class.java)
             startActivity(intent)
         }
+
+        view.fbLogout.setOnClickListener {
+            preferences.clearUser()
+            val intent = Intent(this, SplashScreen::class.java)
+            startActivity(intent)
+            finish()
+        }
+
     }
 
     fun deleteChat(chatroom: chatroom) {

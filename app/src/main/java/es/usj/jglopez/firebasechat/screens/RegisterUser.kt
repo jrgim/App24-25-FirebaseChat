@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import es.usj.jglopez.firebasechat.R
 import es.usj.jglopez.firebasechat.database.ForPreferencesStorageImpl
@@ -16,49 +18,87 @@ import es.usj.jglopez.firebasechat.databinding.ActivityMainBinding
 import es.usj.jglopez.firebasechat.databinding.ActivityRegisterUserBinding
 
 class RegisterUser : AppCompatActivity() {
-    private val view by lazy{
+    private val view by lazy {
         ActivityRegisterUserBinding.inflate(layoutInflater)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(view.root) // Establece la vista correcta
+        setContentView(view.root)
 
-        // Reference to "users" node
-        val usersRef = Firebase.database.getReference("users")
+        val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
+        val preferences = ForPreferencesStorageImpl(sharedPreferences)
+        preferences.clearUser()
 
-        val chatroomMap = HashMap<String, Boolean>()
-        chatroomMap["testRoom"] = false
-
-        // Create a new User without ID
         view.btnCreateUser.setOnClickListener {
-            val user = User(
-                id = "",
-                name = view.etUserName.text.toString(),
-                password = view.etPassword.text.toString(),
-                createdAt = System.currentTimeMillis(),
-                chatrooms = chatroomMap
-            )
+            val username = view.etUserName.text.toString().trim()
+            val password = view.etPassword.text.toString()
 
-            // Push a new child (generates a unique key)
-            val newUserRef = usersRef.push()
+            if (username.isBlank() || password.isBlank()) {
+                Toast.makeText(this, "Fields can't be empty", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-            // Copy the user object and add the generated ID
-            val userWithId = user.copy(id = newUserRef.key!!)
+            val email = "$username@example.com"
+            val auth = FirebaseAuth.getInstance()
+            val dbRef = FirebaseDatabase.getInstance().getReference("users")
 
-            // Set the value
-            newUserRef.setValue(userWithId)
-                .addOnSuccessListener {
-                    Toast.makeText(this, "User saved with ID ${userWithId.name}", Toast.LENGTH_SHORT).show()
+            // 1. Try to log in
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener { authResult ->
+                    Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show()
+                    preferences.saveUser(User(
+                        id = authResult.user?.uid ?: "",
+                        name = username,
+                        password = "",
+                        createdAt = System.currentTimeMillis(),
+                        chatrooms = hashMapOf("testRoom" to false)
+                    ))
+                    goToMainActivity(authResult.user?.uid ?: "", username)
                 }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Error saving user", Toast.LENGTH_SHORT).show()
-                }
-            val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
-            val preferences = ForPreferencesStorageImpl(sharedPreferences)
-            preferences.saveUser(user)
-            startActivity(Intent(this@RegisterUser, MainActivity::class.java))
+                .addOnFailureListener { loginError ->
+                    // 2. If login fails, try to register
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .addOnSuccessListener { authResult ->
+                            val uid = authResult.user?.uid ?: return@addOnSuccessListener
+                            val user = User(
+                                id = uid,
+                                name = username,
+                                password = "",
+                                createdAt = System.currentTimeMillis(),
+                                chatrooms = hashMapOf("testRoom" to false)
+                            )
 
+                            preferences.saveUser(user)
+
+                            dbRef.child(uid).setValue(user)
+                                .addOnSuccessListener {
+                                    Toast.makeText(this, "User registered!", Toast.LENGTH_SHORT)
+                                        .show()
+                                    goToMainActivity(uid, username)
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(
+                                        this,
+                                        "Failed to save user data",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this, "Auth failed: ${it.message}", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                }
         }
+    }
+
+    private fun goToMainActivity(uid: String, name: String) {
+        // You can also save user locally if needed
+        val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra("userId", uid)
+        intent.putExtra("userName", name)
+        startActivity(intent)
+        finish()
     }
 }

@@ -103,7 +103,7 @@ class chatScreen : AppCompatActivity() {
             if (view.messageBody.text.isBlank()) {
                 return@setOnClickListener
             }
-            val message = message("1", preferences.getUser()!!.name, view.messageBody.text.toString(), System.currentTimeMillis())
+            val message = message(preferences.getUser()!!.name, view.messageBody.text.toString(), System.currentTimeMillis())
             try{ chatsRef.child(chatroomId!!).child("messages").push().setValue(message) }
             catch (e: Exception){ Log.d("adapterList", e.toString()) }
             view.messageBody.text.clear()
@@ -181,8 +181,8 @@ class ChatAdapter(currentUser: String) : ListAdapter<message, ChatAdapter.Chatro
     override fun onBindViewHolder(holder: ChatroomViewHolder, position: Int) {
         val messageItem = getItem(position)
         Log.d("userBIND", "$currentUser")
-        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val timeString = messageItem.timestamp?.let { timeFormat.format(Date(it)) } ?: ""
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        val timeString = messageItem.timestamp?.let { dateFormat.format(Date(it)) } ?: ""
         Log.d("userBIND", "$messageItem")
         if (messageItem.senderName == currentUser) {
             holder.itemView.findViewById<View>(R.id.userMessageGroup).visibility = View.VISIBLE
