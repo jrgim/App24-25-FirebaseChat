@@ -53,13 +53,8 @@ class MainActivity : AppCompatActivity() {
         usersRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 Toast.makeText(this@MainActivity, "Data changed", Toast.LENGTH_SHORT).show()
-                for (messageSnapshot in snapshot.children) {
-                    val message = messageSnapshot.getValue(message::class.java)
-                    // Do something with the message
-                }
             }
             override fun onCancelled(error: DatabaseError) {
-                // Handle errors
             }
         })
 
@@ -96,7 +91,6 @@ class MainActivity : AppCompatActivity() {
                     chatList.clear()
                     try {
                         for (chatSnapshot in dataSnapshot.children) {
-                            // Manually parse messages list
                             val messageList = mutableListOf<message>()
                             val messagesSnapshot = chatSnapshot.child("messages")
                             for (messageSnapshot in messagesSnapshot.children) {
@@ -136,6 +130,14 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, CreateChat::class.java)
             startActivity(intent)
         }
+
+        view.fbLogout.setOnClickListener {
+            preferences.clearUser()
+            val intent = Intent(this, SplashScreen::class.java)
+            startActivity(intent)
+            finish()
+        }
+
     }
 }
 
