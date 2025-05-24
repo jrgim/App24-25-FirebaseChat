@@ -82,8 +82,7 @@ class chatScreen : AppCompatActivity() {
                         }
                     }
                     val safeList = messageList
-                        .filter { it.timestamp != null }
-                        .sortedBy { it.timestamp }
+
 
                     // Create chatroom object
                     val safeChatroom = chatroom(id, name, participants, messageList, createdBy, createdAt, safeList.lastOrNull()?.messageText ?: "No messages")
@@ -133,8 +132,7 @@ class chatScreen : AppCompatActivity() {
 
                             // Filter out messages with null timestamp and sort safely
                             val safeList = messageList
-                                .filter { it.timestamp != null }
-                                .sortedBy { it.timestamp }
+
 
                             // Optional: create a safe chatroom instance if you need it
                             chatroom = chatroom(id, name, participants, messageList, createdBy, createdAt, safeList.lastOrNull()?.messageText ?: "No messages")
