@@ -30,20 +30,34 @@ class RegisterUser : AppCompatActivity() {
         val preferences = ForPreferencesStorageImpl(sharedPreferences)
         preferences.clearUser()
 
+        /**
+         * This first part of the function uses Firebase Authorization to manage the Login of the
+         * users of the app.
+         */
         view.btnCreateUser.setOnClickListener {
             val username = view.etUserName.text.toString().trim()
             val password = view.etPassword.text.toString()
 
+            /**
+             * If the username or password is empty it will show a Toast message
+             */
             if (username.isBlank() || password.isBlank()) {
                 Toast.makeText(this, "Fields can't be empty", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            /**
+             * We hardcode the email so that the users only need to remember the user and password,
+             * and dont need to enter the full mail every time.
+             */
             val email = "$username@example.com"
             val auth = FirebaseAuth.getInstance()
             val dbRef = FirebaseDatabase.getInstance().getReference("users")
 
-            // 1. Try to log in
+            /**
+             * This first part checks if a login is possible, meaning that if the user already
+             * exists it will directly login, and on failure it will try to register
+             */
             auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { authResult ->
                     Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show()
@@ -57,7 +71,10 @@ class RegisterUser : AppCompatActivity() {
                     goToMainActivity(authResult.user?.uid ?: "", username)
                 }
                 .addOnFailureListener { loginError ->
-                    // 2. If login fails, try to register
+                    /**
+                     * Now if the login fails, it will try to register the user, and if the
+                     * registration fails it will show a Toast message with the error message
+                     */
                     auth.createUserWithEmailAndPassword(email, password)
                         .addOnSuccessListener { authResult ->
                             val uid = authResult.user?.uid ?: return@addOnSuccessListener
@@ -69,6 +86,10 @@ class RegisterUser : AppCompatActivity() {
                                 chatrooms = hashMapOf("testRoom" to false)
                             )
 
+                            /**
+                             * If the registration is successful, it will save the user data in the
+                             * database and in the shared preferences
+                             */
                             preferences.saveUser(user)
 
                             dbRef.child(uid).setValue(user)
@@ -94,7 +115,6 @@ class RegisterUser : AppCompatActivity() {
     }
 
     private fun goToMainActivity(uid: String, name: String) {
-        // You can also save user locally if needed
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("userId", uid)
         intent.putExtra("userName", name)

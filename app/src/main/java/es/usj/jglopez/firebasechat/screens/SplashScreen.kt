@@ -23,18 +23,22 @@ class SplashScreen : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(view.root) // Establece la vista correcta
+        setContentView(view.root)
 
+        /**
+         * We used shared preferences to store the user data necessary to load the
+         * chatrooms, so in firebase we have all the users and in the local memory of
+         * phone it will only store the necessary info of the user, and when logging out it will
+         * be deleted from the local memory.
+         */
         val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
         val preferences = ForPreferencesStorageImpl(sharedPreferences)
 
         val currentUser = preferences.getUser()
 
         if (currentUser != null) {
-            // Usuario ya está logueado, ir al MainActivity
             startActivity(Intent(this@SplashScreen, MainActivity::class.java))
         } else {
-            // Usuario no logueado, ir al Register/Login Activity
             startActivity(Intent(this@SplashScreen, RegisterUser::class.java))
         }
         finish()

@@ -42,16 +42,26 @@ class chatScreen : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
         val preferences = ForPreferencesStorageImpl(sharedPreferences)
 
+        /**
+         * We get the extra values received from the intent to get the chatroom ID and name
+         */
         val chatroomId = intent.getStringExtra("chatroomID")
         val chatroomName = intent.getStringExtra("chatroomName")
         view.tvChatTitle.text = chatroomName
 
+        /**
+         * This button launch the activity that let us add participants, and sends the chatroomID
+         * as an extra to the intent
+         */
         view.fbAddChat2.setOnClickListener {
             val intent = Intent(this@chatScreen, AddParticipants::class.java)
-            intent.putExtra("chatroomId", chatroomId) // pasamos el ID del chat
+            intent.putExtra("chatroomId", chatroomId)
             startActivity(intent)
         }
 
+        /**
+         * Recycler view for the chat messages
+         */
         val recyclerView = view.rvMessageScreen
         recyclerView.layoutManager = LinearLayoutManager(this)
         val adapterL = ChatAdapter(preferences.getUser()?.name ?:"")
@@ -61,7 +71,14 @@ class chatScreen : AppCompatActivity() {
         var chatroom = chatroom()
 
 
-
+        /**
+         * Get the chatroom info and messages from the firebase
+         * it compares all the instances of the chatroom reference and gets only the one with the
+         * correct ID.
+         *
+         * We had to manually parse the messages and add them to a list because depending on the message
+         * structure, it was fetched as a HashMap so we had to parse it manually and add them to a list
+         */
         chatsRef.get().addOnSuccessListener { dataSnapshot ->
             for (chatSnapshot in dataSnapshot.children) {
                 if (chatSnapshot.key == chatroomId) {
@@ -88,8 +105,8 @@ class chatScreen : AppCompatActivity() {
                     val safeChatroom = chatroom(id, name, participants, messageList, createdBy, createdAt, safeList.lastOrNull()?.messageText ?: "No messages")
 
                     adapterL.submitList(safeList) {
-                        // Este bloque se ejecuta después de que la lista ha sido actualizada en pantalla
                         recyclerView.post {
+                            // This is to scroll to the last message
                             recyclerView.scrollToPosition(safeList.size - 1)
                         }
                     }
@@ -97,7 +114,10 @@ class chatScreen : AppCompatActivity() {
             }
         }
 
-        val messagesRef = chatsRef.child(chatroomId.toString()).child("messages")
+        /**
+         * This is a button that sends the message to the firebase, and doesnt let the user send
+         * if the message is empty or only spaces, tabs or new lines
+         */
         view.sendMessage.setOnClickListener {
             if (view.messageBody.text.isBlank()) {
                 return@setOnClickListener
@@ -108,19 +128,23 @@ class chatScreen : AppCompatActivity() {
             view.messageBody.text.clear()
         }
 
+        /**
+         * This is a listener that gets the chatroom info and messages from the firebase everytime
+         * the data under the chatroom reference is changed.
+         * This way we can update the recycler view with the new messages everytime a new message
+         * is sent to the database
+         */
         chatsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 chatsRef.get().addOnSuccessListener { dataSnapshot ->
                     for (chatSnapshot in dataSnapshot.children) {
                         if (chatSnapshot.key == chatroomId) {
-                            // Manually parse chatroom fields instead of using getValue(chatroom::class.java)
                             val id = chatSnapshot.child("id").value?.toString() ?: ""
                             val name = chatSnapshot.child("name").value?.toString() ?: "Unnamed chat"
                             val participants = chatSnapshot.child("participants").getValue() as? HashMap<String, Boolean>
                             val createdBy = chatSnapshot.child("createdBy").value?.toString() ?: "Unknown"
                             val createdAt = chatSnapshot.child("createdAt").value as? Long
 
-                            // Parse messages manually from the messages child node
                             val messageList = mutableListOf<message>()
                             val messagesSnapshot = chatSnapshot.child("messages")
                             for (messageSnapshot in messagesSnapshot.children) {
@@ -130,16 +154,12 @@ class chatScreen : AppCompatActivity() {
                                 }
                             }
 
-                            // Filter out messages with null timestamp and sort safely
                             val safeList = messageList
 
 
-                            // Optional: create a safe chatroom instance if you need it
                             chatroom = chatroom(id, name, participants, messageList, createdBy, createdAt, safeList.lastOrNull()?.messageText ?: "No messages")
 
-                            // Submit sorted and safe message list to adapter
                             adapterL.submitList(safeList) {
-                                // Este bloque se ejecuta después de que la lista ha sido actualizada en pantalla
                                 recyclerView.post {
                                     recyclerView.scrollToPosition(safeList.size - 1)
                                 }
@@ -158,6 +178,7 @@ class chatScreen : AppCompatActivity() {
     }
 }
 
+
 class ChatAdapter(currentUser: String) : ListAdapter<message, ChatAdapter.ChatroomViewHolder>(DiffCallback()) {
     class ChatroomViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val senderUser: TextView = view.findViewById(R.id.senderUser)
@@ -175,6 +196,11 @@ class ChatAdapter(currentUser: String) : ListAdapter<message, ChatAdapter.Chatro
         return ChatroomViewHolder(view)
     }
 
+    /**
+     * This is so that if the user that sends the message is the same as the current one
+     * (the one stored in shared preferences), it is displayed on the right side of the screen,
+     * otherwise it is displayed on the left side.
+     */
     val currentUser = currentUser
     override fun onBindViewHolder(holder: ChatroomViewHolder, position: Int) {
         val messageItem = getItem(position)
