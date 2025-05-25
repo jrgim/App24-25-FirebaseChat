@@ -2,4 +2,6 @@
     <string name="app_name">Firebase Chat</string>
     <string name="add_chat">add_chat</string>
     <string name="logout">logout</string>
+    <string name="last_message_or_participant_count">Last message or participant count</string>
+    <string name="chat_name">Chat Name</string>
 </resources>
