@@ -1,11 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="16dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
-        android:text="Select users to add"
+        android:text="@string/select_users_to_add"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -20,8 +21,9 @@
 
     <Button
         android:id="@+id/buttonAddParticipants"
-        android:text="Add Participants"
+        android:text="@string/add_participants"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onAddParticipantsClicked"/>
+        android:onClick="onAddParticipantsClicked"
+        tools:ignore="VisualLintButtonSize" />
 </LinearLayout>

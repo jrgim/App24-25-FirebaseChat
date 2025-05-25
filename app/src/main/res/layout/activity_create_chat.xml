@@ -29,7 +29,8 @@
                 android:id="@+id/name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Chat Name"
+                android:autofillHints=""
+                android:hint="@string/chat_name"
                 android:inputType="text"
                 android:importantForAutofill="yes" />
 
@@ -37,7 +38,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Select Participants"
+                android:text="@string/select_participants"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp" />
 
@@ -53,7 +54,7 @@
                 android:id="@+id/submit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Create Chat"
+                android:text="@string/create_chat"
                 android:layout_marginTop="24dp" />
         </LinearLayout>
     </ScrollView>

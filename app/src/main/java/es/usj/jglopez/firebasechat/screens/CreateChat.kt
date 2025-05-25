@@ -18,25 +18,34 @@ import es.usj.jglopez.firebasechat.screens.MainActivity.Companion.chatList
 class CreateChat : AppCompatActivity() {
 
     private val view by lazy { ActivityCreateChatBinding.inflate(layoutInflater) }
+
+    // Adapter for the list of users with checkboxes
     private lateinit var usersAdapter: CheckboxAdapter
+
+    // List of all available users to add to the chat
     private val allUsers = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(view.root)
 
+        // Access the current user's name from shared preferences
         val sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE)
         val preferences = ForPreferencesStorageImpl(sharedPreferences)
         val currentUser = preferences.getUser()!!.name
 
+        // Set up the RecyclerView with the checkbox adapter
         usersAdapter = CheckboxAdapter(allUsers)
         view.usersRecyclerView.layoutManager = LinearLayoutManager(this)
         view.usersRecyclerView.adapter = usersAdapter
 
+        // Load users from Firebase (excluding current user)
         loadUsers(currentUser)
 
+        // When the submit button is clicked
         view.submit.setOnClickListener {
             val chatName = view.name.text.toString().trim()
+
             if (chatName.isEmpty()) {
                 Toast.makeText(this, "Chat name cannot be empty", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -52,12 +61,14 @@ class CreateChat : AppCompatActivity() {
 
             selectedUsers.forEach { selectedParticipants[it] = true }
 
+            // Create the initial message
             val initialMessage = message(
                 senderName = currentUser,
                 messageText = "Created the chat",
                 timestamp = System.currentTimeMillis()
             )
 
+            // Create the chatroom object
             val chat = chatroom(
                 id = "",
                 name = chatName,
@@ -68,6 +79,7 @@ class CreateChat : AppCompatActivity() {
                 createdAt = System.currentTimeMillis()
             )
 
+            // Store the chatroom in Firebase
             val chatsRef = Firebase.database.getReference("chatrooms")
             val newChatRef = chatsRef.push()
             val chatWithId = chat.copy(id = newChatRef.key!!)
@@ -80,7 +92,7 @@ class CreateChat : AppCompatActivity() {
                     Toast.makeText(this, "Error saving chatroom", Toast.LENGTH_SHORT).show()
                 }
 
-            // Actualizar lista de chats
+            // Reload chat list from Firebase and update UI
             chatsRef.get().addOnSuccessListener { dataSnapshot ->
                 chatList.clear()
                 for (chatSnapshot in dataSnapshot.children) {
@@ -89,12 +101,12 @@ class CreateChat : AppCompatActivity() {
                 }
                 adapter.submitList(chatList.toList())
             }
-
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
     }
 
+    // Load all users from Firebase, except the current user
     private fun loadUsers(currentUserName: String) {
         val usersRef = Firebase.database.getReference("users")
         usersRef.get().addOnSuccessListener { dataSnapshot ->

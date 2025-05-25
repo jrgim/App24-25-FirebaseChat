@@ -3,7 +3,7 @@
     android:id="@+id/userCheckBox"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="Nombre del usuario"
+    android:text="@string/Username"
     android:padding="12dp"
     android:textSize="16sp"
     android:textColor="@android:color/black" />

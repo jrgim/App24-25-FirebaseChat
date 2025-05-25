@@ -34,6 +34,5 @@ class CheckboxAdapter(
 
     override fun getItemCount(): Int = users.size
 
-    // Método para obtener la lista de usuarios seleccionados
     fun getSelectedUsers(): Set<String> = selectedUsers
 }
