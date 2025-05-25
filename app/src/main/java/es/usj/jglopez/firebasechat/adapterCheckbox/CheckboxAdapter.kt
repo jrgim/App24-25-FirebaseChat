@@ -1,4 +1,4 @@
-package es.usj.jglopez.firebasechat.adapters
+package es.usj.jglopez.firebasechat.adapterCheckbox
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import es.usj.jglopez.firebasechat.R
 
 class CheckboxAdapter(
-    private val users: List<String>, // lista con nombres de usuarios
-    private val selectedUsers: MutableSet<String> = mutableSetOf() // usuarios seleccionados
+    private val users: List<String>,
+    private val selectedUsers: MutableSet<String> = mutableSetOf()
 ) : RecyclerView.Adapter<CheckboxAdapter.UserViewHolder>() {
 
     inner class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {

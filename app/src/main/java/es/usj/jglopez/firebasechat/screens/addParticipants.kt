@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import es.usj.jglopez.firebasechat.R
-import es.usj.jglopez.firebasechat.adapters.CheckboxAdapter
+import es.usj.jglopez.firebasechat.adapterCheckbox.CheckboxAdapter
 
 class AddParticipants : AppCompatActivity() {
 

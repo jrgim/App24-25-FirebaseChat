@@ -1,8 +1,6 @@
 package es.usj.jglopez.firebasechat.screens
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,14 +18,12 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import es.usj.jglopez.firebasechat.R
 import es.usj.jglopez.firebasechat.database.ForPreferencesStorageImpl
-import es.usj.jglopez.firebasechat.database.message
 import es.usj.jglopez.firebasechat.database.chatroom
+import es.usj.jglopez.firebasechat.database.message
 import es.usj.jglopez.firebasechat.databinding.ActivityChatScreenBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.core.graphics.toColorInt
-import es.usj.jglopez.firebasechat.screens.MainActivity.Companion.adapter
 
 
 class chatScreen : AppCompatActivity() {
@@ -102,7 +98,7 @@ class chatScreen : AppCompatActivity() {
 
 
                     // Create chatroom object
-                    val safeChatroom = chatroom(id, name, participants, messageList, createdBy, createdAt, safeList.lastOrNull()?.messageText ?: "No messages")
+                    chatroom(id, name, participants, messageList, createdBy, createdAt, safeList.lastOrNull()?.messageText ?: "No messages")
 
                     adapterL.submitList(safeList) {
                         recyclerView.post {

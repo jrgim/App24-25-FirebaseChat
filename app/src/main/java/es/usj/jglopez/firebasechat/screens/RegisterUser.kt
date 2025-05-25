@@ -3,18 +3,11 @@ package es.usj.jglopez.firebasechat.screens
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.database
-import es.usj.jglopez.firebasechat.R
 import es.usj.jglopez.firebasechat.database.ForPreferencesStorageImpl
 import es.usj.jglopez.firebasechat.database.User
-import es.usj.jglopez.firebasechat.databinding.ActivityMainBinding
 import es.usj.jglopez.firebasechat.databinding.ActivityRegisterUserBinding
 
 class RegisterUser : AppCompatActivity() {
@@ -62,9 +55,7 @@ class RegisterUser : AppCompatActivity() {
                 .addOnSuccessListener { authResult ->
                     Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show()
                     preferences.saveUser(User(
-                        id = authResult.user?.uid ?: "",
                         name = username,
-                        password = "",
                         createdAt = System.currentTimeMillis(),
                         chatrooms = hashMapOf("testRoom" to false)
                     ))
@@ -79,9 +70,7 @@ class RegisterUser : AppCompatActivity() {
                         .addOnSuccessListener { authResult ->
                             val uid = authResult.user?.uid ?: return@addOnSuccessListener
                             val user = User(
-                                id = uid,
                                 name = username,
-                                password = "",
                                 createdAt = System.currentTimeMillis(),
                                 chatrooms = hashMapOf("testRoom" to false)
                             )

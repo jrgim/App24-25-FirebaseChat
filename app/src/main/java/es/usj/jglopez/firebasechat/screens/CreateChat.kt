@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
-import es.usj.jglopez.firebasechat.adapters.CheckboxAdapter
+import es.usj.jglopez.firebasechat.adapterCheckbox.CheckboxAdapter
 import es.usj.jglopez.firebasechat.database.ForPreferencesStorageImpl
 import es.usj.jglopez.firebasechat.database.chatroom
 import es.usj.jglopez.firebasechat.database.message
