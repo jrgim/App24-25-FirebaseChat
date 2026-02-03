@@ -222,6 +222,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📄 License
 
 This project is created for educational purposes at Universidad San Jorge (USJ).
+MIT
 
 ## 👨‍💻 Authors
 
@@ -231,26 +232,3 @@ Developed for USJ (2024-2025) by:
 - **lamari777** (Álex Langarita)
 - **LilSamu** (Samuel Orgaz)
 - **777ruslanski** (Pablo Tudela)
-
-## 📞 Support
-
-If you encounter any issues or have questions, please open an issue in the GitHub repository.
-
-## 🔄 Future Enhancements
-
-Potential features for future development:
-
-- [ ] Profile pictures for users
-- [ ] Image and file sharing in chats
-- [ ] Push notifications for new messages
-- [ ] Message read receipts
-- [ ] Typing indicators
-- [ ] Search functionality for messages
-- [ ] Chat room avatars
-- [ ] User online/offline status
-- [ ] Message reactions (emoji)
-- [ ] Voice messages
-- [ ] Video calls
-- [ ] Admin roles for chat rooms
-- [ ] Message editing and deletion
-- [ ] Dark/Light theme toggle
