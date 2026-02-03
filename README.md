@@ -226,11 +226,11 @@ This project is created for educational purposes at Universidad San Jorge (USJ).
 ## 👨‍💻 Authors
 
 Developed for USJ (2024-2025) by:
-- **jglopez** - Project lead and main developer
-- **Arksuga02** (Arkaitz Subias Garcia) - Contributor
-- **lamari777** (Álex Langarita) - Contributor
-- **LilSamu** (Samuel Orgaz) - Contributor
-- **777ruslanski** (Pablo Tudela) - Contributor
+- **jgim** (Jorge Giménez)
+- **Arksuga02** (Arkaitz Subias Garcia)
+- **lamari777** (Álex Langarita)
+- **LilSamu** (Samuel Orgaz)
+- **777ruslanski** (Pablo Tudela)
 
 ## 📞 Support
 
