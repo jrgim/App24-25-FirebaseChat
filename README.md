@@ -223,9 +223,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is created for educational purposes at Universidad San Jorge (USJ).
 
-## 👨‍💻 Author
+## 👨‍💻 Authors
 
-Developed by jglopez for USJ (2024-2025)
+Developed for USJ (2024-2025) by:
+- **jglopez** - Project lead and main developer
+- **Arksuga02** (Arkaitz Subias Garcia) - Contributor
 
 ## 📞 Support
 
